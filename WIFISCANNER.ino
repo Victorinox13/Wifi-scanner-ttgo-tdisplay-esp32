@@ -1,91 +1,110 @@
-#include <WiFi.h>      // Wi-Fi scanning library
-#include <TFT_eSPI.h>  // TFT display library
+#include <WiFi.h>     
+#include <TFT_eSPI.h>  
 #include <Wire.h>
 
-TFT_eSPI tft = TFT_eSPI(); // Initialize TFT instance
-#define BUTTON_PIN 0
-int buttonPressed = 0;
+TFT_eSPI tft = TFT_eSPI(); 
+
+int LeftbuttonPressed = 3;
+int RightbuttonPressed = 3;
 int networksScanned = 0;
 
-
-
 void setup() {
-  // Initialize serial communication for debugging
   Serial.begin(115200);
-
   //button
-  pinMode(BUTTON_PIN, INPUT_PULLUP);
-
-  // Initialize the TFT display
+  pinMode(0, INPUT_PULLUP);
+  pinMode(35, INPUT_PULLUP);
+  //scherm initialisatie
   tft.init();
-  tft.setRotation(0); // Set display to landscape orientation
-  tft.fillScreen(TFT_BLACK); // Clear the display
-  tft.setTextColor(TFT_GREEN, TFT_BLACK); // Set text color to white on black
+  tft.setRotation(0); 
+  tft.fillScreen(TFT_BLACK); 
+  tft.setTextColor(TFT_GREEN, TFT_BLACK); 
   tft.setTextSize(1);
-
   // wifi initialization
-  WiFi.mode(WIFI_STA); // Set Wi-Fi to station mode
-  WiFi.disconnect();   // Ensure no active connections
+  WiFi.mode(WIFI_STA); 
+  WiFi.disconnect();  
   Serial.println("Wi-Fi initialized. Starting scan...");
 
-  // Display a welcome message animation
-  tft.fillScreen(TFT_BLACK);
-    tft.setCursor((tft.width() - tft.textWidth("WiFi scanner")) / 2, 110);
-    tft.println("WiFI scanner");
-    tft.setCursor((tft.width() - tft.textWidth("Victor Deleeck")) / 2, 120);
-    tft.println("Victor Deleeck");
-
-    tft.setCursor((tft.width() - tft.textWidth("Press left button")) / 2, 20);
-    tft.println("Press left button");
-    tft.setCursor((tft.width() - tft.textWidth("to start scanning.")) / 2, 30);
-    tft.println("to start scanning.");
-
+  WelcomeScreen();
 }
 
 void loop() {
 
+ int RightbuttonState = digitalRead(35);
+ int LeftbuttonState = digitalRead(0);
 
-  if (buttonPressed == 0 || buttonPressed == 2){
-    buttonPressed = 0;
-    delay(100);
-  }else{
-   
-   Serial.println("going scanning");
-   networksScanned = WifiScan();
-   
-   Serial.println("scanned");
-   
-  
+  if (LeftbuttonState == LOW) {
+    CheckForLeftBut(LeftbuttonState);
+    RightbuttonPressed =0;
+    delay(500);
+  }
+  if (RightbuttonState == LOW) {
+    RightbuttonPressed += 1;
+
+    Serial.println("right button pressed");
+    LeftbuttonPressed = 0;  
+                                                                              tft.setCursor(10, 220);
+    tft.println("                ");// om scanning... te verwijderen
+                                                                         SetDisplayCursor(10 * RightbuttonPressed + 10);
+    delay(500);
   }
   
- int buttonState = digitalRead(BUTTON_PIN);
-  if (buttonState == LOW) {
-    buttonPressed = buttonPressed + 1;
-    Serial.println("button pressed");
-    tft.setCursor(10, 220);
-    tft.println("                ");
-    delay(500);
-    tft.fillScreen(TFT_BLACK);
-    
-  };
-
-  displayScan(networksScanned);
-}
-void displayScan(int n) { 
+         if (LeftbuttonPressed == 1){
+   
+           Serial.println("going scanning");
+           networksScanned = WifiScan();
+           Serial.println("scanned");
+           displayScan(networksScanned);
+          
+           LeftbuttonPressed = 0;
   
+         }
+  
+}
 
+void CheckForLeftBut(int LeftbuttonState) {
+     Serial.println("button pressed");
+                                                                       tft.setCursor(10, 220);
+    tft.println("                ");// om scanning... te verwijderen
+    LeftbuttonPressed = LeftbuttonPressed + 1;
+     if (LeftbuttonPressed == 4){
+        //Linker knop voor de eerste keer ingedrukt.
+      LeftbuttonPressed = 1;
+      tft.fillScreen(TFT_BLACK);
 
-   if (n == 0) {
+    }else if (LeftbuttonPressed == 0 || LeftbuttonPressed == 2){
+          LeftbuttonPressed = 0;   
+    }
+}
+
+void displayScan(int n) { 
+                                                                       tft.setCursor(50,5);
+  tft.println(n);
+
+  if (n == 0) {
     
   } else {
-    // Display the ESSIDs of found networks
+
     for (int i = 0; i < n; ++i) {
-      // Format and display each network's ESSID
+
       String ssid = WiFi.SSID(i);
+      
       long int signalStrength = WiFi.RSSI(i);
-      // Display on TFT screen
-      tft.setCursor(5, 30 + (i * 10)); // Adjust vertical position for each ESSID
-      tft.printf("%d: %s %ld", i + 1, ssid.c_str(), signalStrength);
+
+                                                                                         tft.setCursor(10, 20 + (i * 10));
+      
+      String MaxstatsWifi = String(i + 1) + ": " + ssid + " " + String(signalStrength);
+      String MedstatsWifi = String(i + 1) + ": " + ssid;
+      String MinstatsWifi = ssid;
+
+      if ((tft.textWidth(MedstatsWifi) + 20) >= tft.width()){
+        tft.println(ssid);
+      }else if ((tft.textWidth(MaxstatsWifi) + 20) >= tft.width()){
+         tft.println(MedstatsWifi);
+      }else{
+        tft.println(MaxstatsWifi);
+      }
+
+      
 
     }
     
@@ -93,12 +112,38 @@ void displayScan(int n) {
 
 }
 int WifiScan(){
-  tft.setCursor(10, 220);
+                                                                          tft.setCursor(10, 220);
   tft.println("Scanning...");
   int n = WiFi.scanNetworks();
   Serial.println("this is var N");
   Serial.println(n);
+   tft.fillScreen(TFT_BLACK);
   return n;
 };
 
 
+
+void WelcomeScreen(){ tft.fillScreen(TFT_BLACK);
+ 
+                                                                                 tft.setCursor((tft.width() - tft.textWidth("WiFi scanner")) / 2, 110);
+    tft.println("WiFI scanner");
+                                                                                 tft.setCursor((tft.width() - tft.textWidth("Victor Deleeck")) / 2, 120);
+    tft.println("Victor Deleeck");
+
+                                                                                 tft.setCursor((tft.width() - tft.textWidth("Press left button")) / 2, 20);
+    tft.println("Press left button");
+                                                                                  tft.setCursor((tft.width() - tft.textWidth("to start scanning.")) / 2, 30);
+    tft.println("to start scanning.");
+};
+
+void SetDisplayCursor(int y){
+                                                                               tft.setCursor(2 ,y - 10);
+    tft.setTextColor(TFT_GREEN, TFT_BLACK); 
+    tft.println(" ");
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+
+                                                                                tft.setCursor(2 ,y);
+    tft.setTextColor(TFT_WHITE, TFT_BLACK); 
+    tft.println("|");
+    tft.setTextColor(TFT_GREEN, TFT_BLACK);
+}
