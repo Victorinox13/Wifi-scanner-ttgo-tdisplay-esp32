@@ -144,7 +144,7 @@ void displayScan(int n) {
      
 
       tft.setCursor(7, 20 + (i * 10));
-      networks[i].allInfo = MaxstatsWifi;
+      
       if (networks[i].encryptionType == "OPEN"){tft.setTextColor(TFT_PINK, TFT_BLACK); tft.print("*"); tft.setTextColor(TFT_GREEN, TFT_BLACK);}
       if (networks[i].encryptionType == "WPA2"){tft.setTextColor(TFT_WHITE, TFT_BLACK); tft.print("*"); tft.setTextColor(TFT_GREEN, TFT_BLACK);}
       if (networks[i].encryptionType == "WPA3"){tft.setTextColor(TFT_GREEN, TFT_BLACK); tft.print("*"); tft.setTextColor(TFT_GREEN, TFT_BLACK);}
@@ -156,6 +156,8 @@ void displayScan(int n) {
       String MaxstatsWifi = String(i + 1) + ": " + ssid + " " + String(signalStrength);
       String MedstatsWifi = String(i + 1) + ": " + ssid;
       String MinstatsWifi = ssid;
+
+      networks[i].allInfo = MaxstatsWifi;
 
       if ((tft.textWidth(MinstatsWifi) +20) >= tft.width()){
         tft.setTextSize(0.5);
