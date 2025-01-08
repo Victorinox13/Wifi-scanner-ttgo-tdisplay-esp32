@@ -207,7 +207,8 @@ void loop() {
           Serial.print(".");
           delay(100);
        }      
-       
+       tft.setCursor(10, 40);
+       tft.println("CONNECTED.. ");
       Serial.print("You're connected to the network");
       IPAddress ip = WiFi.localIP();
       tft.setCursor(10, 50);
@@ -221,8 +222,8 @@ void loop() {
 
 
     }
-    else if (networks[LeftbuttonPressed -1].ssid == "---"){
-       WiFi.begin("---", "---");
+    else if (networks[LeftbuttonPressed -1].ssid == "---"){               // SSID OF YOUR NETWORK HERE
+       WiFi.begin("---", "---");                           // SSID + PASSWORD HERE
        Serial.println("\nConnecting");
        tft.setCursor(10, 40);
        tft.println("Connecting");
@@ -231,8 +232,10 @@ void loop() {
           Serial.print(".");
           delay(100);
        }
+       tft.setCursor(10, 40);
+       tft.println("CONNECTED..");
       
-      Serial.print("You're connected to the network");
+      Serial.print("SJS CONNECTED");
       IPAddress ip = WiFi.localIP();
       tft.setCursor(10, 50);
       tft.print("IP: ");
@@ -303,16 +306,16 @@ void SetDisplayCursor(int y){
 
 // Define IP range
 const char* subnet = "192.168.1."; // Base subnet
-int startIP = 200;                   // Start of IP range
+int startIP = 0;                   // Start of IP range                                                                               I have this on 200 so it is shorter
 int endIP = 255;                   // End of IP range
 
 
 //const int ports[] = {21, 23, 80, 443, 445, 554, 1723, 3389}; // Telnet, HTTP, HTTPS
-//const char* portNames[] = {"FTP", "Telnet", "HTTP", "HTTPS", "FTPS", "rtsp", "PPTP", "RDP"}; // Names for ports
+//const char* portNames[] = {"FTP", "Telnet", "HTTP", "HTTPS", "FTPS", "rtsp", "PPTP", "RDP"}; //                                     this is if you want to scan more ports, but they wont fit on the screen...
 
-const int ports[] = {23, 80, 443, 554};
+const int ports[] = {23, 80, 443, 554, 3389};
 const int numPorts = sizeof(ports) / sizeof(ports[0]);
-const char* portNames[] = {"Telnet", "HTTP", "HTTPS", "rtsp"}; // Names for ports
+const char* portNames[] = {"Telnet", "HTTP", "HTTPS", "rtsp", "RDP"}; // Names for ports
 
 
 String openIp[256];         // Store IPs with open ports
@@ -337,6 +340,7 @@ void portScanner(){
         }
         portList += portNames[j];
         isOpen = true;
+        
       }
     }
 
@@ -353,9 +357,9 @@ void portScanner(){
   for (int i = 0; i < openIpCount; i++) {
 
     tft.setTextSize(0.5);
-    tft.setCursor(2, 60 + 10*i);
+    tft.setCursor(2, 70 + 10*i);
     Serial.printf("%s %s\n", openIp[i].c_str(), openPorts[i].c_str());
-    tft.printf("%s  %s\n", (openIp[i].substring(10)).c_str(), openPorts[i].c_str());
+    tft.printf("%s-%s\n", (openIp[i].substring(10)).c_str(), openPorts[i].c_str());
   }
 
 
