@@ -244,29 +244,6 @@ void loop() {
       tft.println(gateway);
       portScanner();
     } 
-    else if (networks[LeftbuttonPressed -1].ssid == "LaptopsLLN"){
-       WiFi.begin("LaptopsLLN", "dGVCTsrnc7D4MoYNdqg2");
-       Serial.println("\nConnecting");
-       tft.setCursor(10, 40);
-       tft.println("Connecting");
-
-       while(WiFi.status() != WL_CONNECTED){
-          Serial.print(".");
-          delay(100);
-       }
-      
-      Serial.print("SJS CONNECTED");
-      IPAddress ip = WiFi.localIP();
-      tft.setCursor(10, 50);
-      tft.print("IP: ");
-      tft.println(ip);
-
-      IPAddress gateway = WiFi.gatewayIP();
-      tft.setCursor(10, 60);
-      tft.print("GW: ");
-      tft.println(gateway);
-      portScanner();
-    } 
     else {
        tft.setCursor(10, 120);
        tft.println("No actions yet.");
